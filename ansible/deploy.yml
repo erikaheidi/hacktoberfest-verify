@@ -4,7 +4,7 @@
   environment:
     SYMFONY_ENV: "prod"
   vars:
-    repository: 'git@github.com:erikaheidi/hacktoberfest.git'
+    repository: 'git@github.com:erikaheidi/hacktoberfest-verify.git'
     deps: [ 'acl' ]
   vars_prompt:
     - name: deploy_version
@@ -13,14 +13,6 @@
       private: no
 
   tasks:
-    - name: Setup deploy keys - private
-      sudo: false
-      copy: src=files/deploy_key dest=/home/{{ app.system_user }}/.ssh/id_rsa  owner={{ app.system_user }} group={{ app.system_user }} mode=0600
-
-    - name: Setup deploy keys - public
-      sudo: false
-      copy: src=files/deploy_key.pub dest=/home/{{ app.system_user }}/.ssh/id_rsa.pub  owner={{ app.system_user }} group={{ app.system_user }} mode=0600
-
     - name: Install dependencies
       apt: pkg={{ item }} state=latest
       sudo: yes
@@ -39,10 +31,6 @@
 
     - name: Make sure parameters.yml is in place
       template: src=roles/app/templates/parameters.yml.tpl dest={{ app.docroot }}/app/config/parameters.yml
-
-#    - name: Self-update Composer
-#      sudo: yes
-#      shell: /usr/local/bin/composer self-update
 
     - name: Run Composer
       shell: /usr/local/bin/composer install --no-dev --no-progress --optimize-autoloader --prefer-dist chdir={{ app.docroot }}
