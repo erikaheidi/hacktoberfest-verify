@@ -1,0 +1,70 @@
+<!DOCTYPE HTML>
+<!--
+	Identity by HTML5 UP
+	html5up.net | @n33co
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+<head>
+    <title>{% block title %}Hacktoberfest Verification Script{% endblock %}</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {% block stylesheets %}
+
+        {% stylesheets
+            'assets/css/main.css'
+            'assets/css/custom.css'
+            filter='cssrewrite' output='css/app.css' %}
+            <link rel="stylesheet" href="{{ asset_url }}" />
+        {% endstylesheets %}
+
+        <!--[if lte IE 8]><script src="{{ asset('assets/js/html5shiv.js') }}"></script><![endif]-->
+        <!--[if lte IE 9]><link rel="stylesheet" href="{{ asset('assets/css/ie9.css') }}" /><![endif]-->
+        <!--[if lte IE 8]><link rel="stylesheet" href="{{ asset('assets/css/ie8.css') }}" /><![endif]-->
+        <noscript><link rel="stylesheet" href="{{ asset('assets/css/noscript.css') }}" /></noscript>
+    {% endblock %}
+</head>
+<body class="is-loading">
+
+<!-- Wrapper -->
+<div id="wrapper">
+
+    <!-- Main -->
+    <section id="main">
+        {% block content %}
+        {% endblock %}
+    </section>
+
+    <p class="small footer-note">For more information about Hacktoberfest,<br>
+        <a href="https://hacktoberfest.digitalocean.com" target="_blank" title="Hacktoberfest by DigitalOcean">check the official website</a>.</p>
+    <!-- Footer -->
+    <footer id="footer">
+         <img src="{{ asset('images/do_logo.png') }}">
+    </footer>
+
+
+</div>
+
+{% block javascripts %}
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+
+    {% javascripts
+        'assets/js/spin.min.js'
+        'assets/js/spin.jquery.js'
+        output='js/app.js' %}
+        <script data-main="scripts/main" src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+
+<!-- Scripts -->
+<!--[if lte IE 8]><script src="{{ asset('assets/js/respond.min.js') }}"></script><![endif]-->
+<script>
+    if ('addEventListener' in window) {
+        window.addEventListener('load', function() { document.body.className = document.body.className.replace(/\bis-loading\b/, ''); });
+        document.body.className += (navigator.userAgent.match(/(MSIE|rv:11\.0)/) ? ' is-ie' : '');
+    }
+</script>
+{% endblock %}
+
+</body>
+</html>

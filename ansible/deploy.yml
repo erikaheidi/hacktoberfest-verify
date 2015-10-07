@@ -1,0 +1,79 @@
+---
+- hosts: all
+  user: "{{ app.system_user }}"
+  environment:
+    SYMFONY_ENV: "prod"
+  vars:
+    repository: 'git@github.com:erikaheidi/hacktoberfest.git'
+    deps: [ 'acl' ]
+  vars_prompt:
+    - name: deploy_version
+      default: master
+      prompt: "Tag, Branch or Hash to deploy"
+      private: no
+
+  tasks:
+    - name: Setup deploy keys - private
+      sudo: false
+      copy: src=files/deploy_key dest=/home/{{ app.system_user }}/.ssh/id_rsa  owner={{ app.system_user }} group={{ app.system_user }} mode=0600
+
+    - name: Setup deploy keys - public
+      sudo: false
+      copy: src=files/deploy_key.pub dest=/home/{{ app.system_user }}/.ssh/id_rsa.pub  owner={{ app.system_user }} group={{ app.system_user }} mode=0600
+
+    - name: Install dependencies
+      apt: pkg={{ item }} state=latest
+      sudo: yes
+      with_items: deps
+
+    - name: Make sure docroot directory exists
+      sudo: yes
+      file: path={{ app.docroot }} state=directory owner={{ app.system_user }} group={{ app.system_user }}
+
+    - name: Set Maintenance Page
+      shell: cp {{ nginx.docroot }}/maintenance/maintenance.html {{ nginx.docroot }}/maintenance.html
+      ignore_errors: true
+
+    - name: Checkout code
+      git: repo={{ repository }} dest={{ app.docroot }} accept_hostkey=true version={{ deploy_version }}
+
+    - name: Make sure parameters.yml is in place
+      template: src=roles/app/templates/parameters.yml.tpl dest={{ app.docroot }}/app/config/parameters.yml
+
+#    - name: Self-update Composer
+#      sudo: yes
+#      shell: /usr/local/bin/composer self-update
+
+    - name: Run Composer
+      shell: /usr/local/bin/composer install --no-dev --no-progress --optimize-autoloader --prefer-dist chdir={{ app.docroot }}
+      environment:
+        SYMFONY_ENV: prod
+
+    - name: Read ACLs for web_user
+      sudo: yes
+      shell: 'setfacl -Rn -m u:"{{ app.web_user }}":rX -m d:u:"{{ app.web_user }}":rX {{ app.docroot }}'
+
+    - name: Read and Write ACLs for shell user
+      sudo: yes
+      shell: 'setfacl -Rn -m u:"{{ app.system_user }}":rwX -m d:u:"{{ app.system_user }}":rwX {{ app.docroot }}'
+
+    - name: Read and Write ACLs for web user on cache
+      sudo: yes
+      shell: 'setfacl -Rn -m u:"{{ app.web_user }}":rwX -m d:u:"{{ app.web_user }}":rwX {{ app.docroot }}/app/cache'
+
+    - name: Read and Write ACLs for web user on logs
+      sudo: yes
+      shell: 'setfacl -Rn -m u:"{{ app.web_user }}":rwX -m d:u:"{{ app.web_user }}":rwX {{ app.docroot }}/app/logs'
+
+    - name: Clears Cache
+      shell: php app/console cache:clear --env=prod --no-debug chdir={{ app.docroot }}
+      environment:
+        SYMFONY_ENV: prod
+
+    - name: Dumps Assets
+      shell: php app/console assetic:dump --env=prod --no-debug chdir={{ app.docroot }}
+      environment:
+        SYMFONY_ENV: prod
+
+    - name: Remove maintenance page
+      file: path="{{ nginx.docroot }}/maintenance.html" state=absent

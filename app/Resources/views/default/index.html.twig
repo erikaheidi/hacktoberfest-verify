@@ -1,0 +1,76 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    <header>
+        <span class="avatar"><img src="{{ asset('images/sammy.png') }}" alt="" /></span>
+        <h1>Hacktoberfest</h1>
+        <p>Verification Script</p>
+    </header>
+
+    {% if app.user and is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+        <h2>Hi there, <strong>{{ app.user.username }}</strong> ! </h2>
+        <div id="verification">
+            <p>Click the button below to run the verification script.<br>This operation might take a couple minutes to complete.</p>
+            <p><a href="#" id="button-verify" onclick="verifyUserPullRequests()" class="button"><span class="fa fa-github-square"></span> Run Verification</a> </p>
+        </div>
+        <p class="small">You are currently logged in as @{{ app.user.username }}. <a href="{{ path('sauth_logout') }}">Click here to log out</a>.</p>
+    {% else %}
+
+        <footer>
+            <a href="{{ path('sauth_connect', {service: 'github'}) }}" class="button"><span class="fa fa-github"></span> Sign in with Github</a>
+        </footer>
+    {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script type="text/javascript">
+        var opts = {
+            lines: 13 // The number of lines to draw
+            , length: 28 // The length of each line
+            , width: 14 // The line thickness
+            , radius: 42 // The radius of the inner circle
+            , scale: 1 // Scales overall size of the spinner
+            , corners: 1 // Corner roundness (0..1)
+            , color: '#000' // #rgb or #rrggbb or array of colors
+            , opacity: 0.25 // Opacity of the lines
+            , rotate: 0 // The rotation offset
+            , direction: 1 // 1: clockwise, -1: counterclockwise
+            , speed: 1 // Rounds per second
+            , trail: 60 // Afterglow percentage
+            , fps: 20 // Frames per second when using setTimeout() as a fallback for CSS
+            , zIndex: 2e9 // The z-index (defaults to 2000000000)
+            , className: 'spinner' // The CSS class to assign to the spinner
+            , top: '50%' // Top position relative to parent
+            , left: '50%' // Left position relative to parent
+            , shadow: false // Whether to render a shadow
+            , hwaccel: false // Whether to use hardware acceleration
+            , position: 'absolute' // Element positioning
+        };
+
+        var target = document.getElementById('verification')
+        var spinner = new Spinner(opts);
+
+        function verifyUserPullRequests(force) {
+
+            $('#verification')
+                    .html('Working, please wait...');
+
+            spinner.spin(target);
+
+            var path = "{{ path('verify') }}";
+
+            if (force) {
+                path = path + '?force_update=1';
+            }
+
+            $.post(path)
+                    .done(function( data ) {
+                        $('#verification')
+                                .html(data)
+                                .spin(false);
+                    });
+        }
+    </script>
+{% endblock %}

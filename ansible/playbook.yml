@@ -1,0 +1,12 @@
+---
+- hosts: all
+  sudo: true
+  roles:
+    - server
+    - vagrant_local
+    - nginx
+    - mysql
+    - redis
+    - php
+    - composer
+    - app

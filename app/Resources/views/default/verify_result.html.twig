@@ -1,0 +1,47 @@
+<div class="verification-result">
+    {% set total = 0 %}
+    {% if pullrequests is defined and pullrequests %}
+      {% set total = pullrequests|length %}
+    {% endif %}
+
+    {% if total > 4 %}
+          {% set title = "Amazing! You're such an overachiever!" %}
+          {% set message = "You did your homework, congratulations!" %}
+      {% elseif total == 4 %}
+          {% set title = "Congratulations, you made it!" %}
+          {% set message = "You are all set for getting your prize." %}
+      {% elseif total == 3 %}
+          {% set title = "Just one more to go!" %}
+          {% set message = "You are so close! Get one more PR out there to guarantee your prize." %}
+      {% elseif total == 2 %}
+          {% set title = "You Are Almost There!" %}
+          {% set message = "You're half-way there, keep up with the good work!" %}
+      {% elseif total == 1 %}
+          {% set title = "Good Job - Keep up!" %}
+          {% set message = "That's already a good start - keep up!" %}
+      {% else %}
+          {% set title = "There's still time!" %}
+          {% set message = "Aw, it seems you don't have any valid Pull Request yet, but there's still time! " %}
+    {% endif %}
+          <h3>{{ title }}</h3>
+          <p>{{ message }}</p>
+
+    {% if pullrequests is defined and pullrequests %}
+        <h4>Total valid PRs found: <strong>{{ total }}</strong> / 4</h4>
+        {% for pr in pullrequests %}
+        <div class="pullrequest">
+            <div>
+                <a href="{{ pr.base.repo.html_url }}" class="project">{{ pr.base.repo.full_name }}</a>
+                <p class="project-meta">
+                    <span><i class="fa fa-star"></i> {{ pr.base.repo.stargazers_count }}</span>
+                    <span><i class="fa fa-code-fork"></i> {{ pr.base.repo.forks_count }}</span>
+                    <span><i class="fa fa-code"></i> {{ pr.base.repo.language }}</span>
+                </p>
+            </div>
+            <h4><a href="{{ pr.html_url }}" target="_blank">{{ pr.title|default('No Title Provided') }}</a></h4>
+        </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<p><a href="#" id="button-verify" onclick="verifyUserPullRequests(1)" class="button"><span class="fa fa-github-square"></span> Fetch Updated Results</a></p>
