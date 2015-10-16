@@ -16,7 +16,7 @@ div.verification {
 }
 
 div.verification-result {
-    width: 700px;
+    width: 100%;
     background-color: #414f57;
     color: #F5F5F5;
     padding: 20px 25px;

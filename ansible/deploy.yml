@@ -4,7 +4,7 @@
   environment:
     SYMFONY_ENV: "prod"
   vars:
-    repository: 'git@github.com:erikaheidi/hacktoberfest-verify.git'
+    repository: 'https://github.com/erikaheidi/hacktoberfest-verify.git'
     deps: [ 'acl' ]
   vars_prompt:
     - name: deploy_version
