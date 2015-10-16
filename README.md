@@ -7,4 +7,6 @@ You can try it here: [http://hf.heidilabs.com](http://hf.heidilabs.com)
 
 Built in PHP, on top of Symfony.
 
-Created by [@erikaheidi](http://twitter.com/erikaheidi)
+Created by [@erikaheidi](http://twitter.com/erikaheidi).
+
+*Hacktoberfest is an initiative created by [DigitalOcean](http://digitalocean.com)*
