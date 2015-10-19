@@ -38,7 +38,7 @@ class DefaultController extends Controller
             $search = $github->getUserPullRequests($user->getUsername());
 
             if ($search) {
-                $pullrequests = $search['pullrequests'];
+                $pullrequests = $search['items'];
                 $cache->save($key, $pullrequests);
             }
         }
