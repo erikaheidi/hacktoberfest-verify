@@ -12,8 +12,8 @@ class GithubPRChecker
 {
     protected $oauthToken;
     protected $guzzle;
-    protected $startDate;
-    protected $endDate;
+
+    static $API_BASE = 'https://api.github.com';
 
     /**
      * @param string $oauthtoken
@@ -22,9 +22,6 @@ class GithubPRChecker
     {
         $this->oauthToken = $oauthtoken;
         $this->guzzle = new Client();
-
-        $this->startDate = new \DateTimeImmutable('first day of October');
-        $this->endDate   = new \DateTimeImmutable('last day of October');
     }
 
     /**
@@ -41,7 +38,7 @@ class GithubPRChecker
      */
     public function getRemainingCalls()
     {
-        $response = $this->authenticatedRequest('https://api.github.com/rate_limit');
+        $response = $this->authenticatedRequest(self::$API_BASE . '/rate_limit');
 
         if ($response->getStatusCode() == 200) {
             $status = json_decode($response->getBody(), 1);
@@ -53,93 +50,39 @@ class GithubPRChecker
     }
 
     /**
-     * @param $username
+     * @param string $username
+     * @param bool $lazy When set to true, will return only the raw json decoded search result, not fetching individual PRs
      * @return array
      */
-    public function getUserPullRequests($username)
+    public function getUserPullRequests($username, $lazy = false)
     {
-        $url = "https://api.github.com/users/$username/events";
+        $url = self::$API_BASE . "/search/issues?q=author:$username+type:pr+created:2015-10-01..2015-10-31";
+
+        $response = $this->authenticatedRequest($url);
         $pullrequests = [];
-        $pages = [];
 
-        // max 10 requests per user (max pagination allowed) = 300 results max.
-        for ($i = 0; $i < 10; $i++) {
-            $response = $this->authenticatedRequest($url);
-            $headers = $response->getHeaders();
-
-            if ($response->getStatusCode() == 200) {
-                $pages[] = $this->getPullRequests($response);
-            }
-
-            if (!isset($headers['Link'])) {
-                break;
-            }
-
-            $url = $this->getNextPage($headers['Link'][0]);
-
-            if (!$url) {
-                //no "next" page found; no more events for this user
-                break;
-            }
+        if ($response->getStatusCode() !== 200) {
+            return null;
         }
 
-        foreach ($pages as $page) {
-            foreach ($page as $pr) {
-                $pullrequests[] = $pr;
-            }
+        $body = json_decode($response->getBody(), 1);
+        $total = $body['total_count'];
+        if ($total == 0) {
+            return null;
         }
 
-        return $pullrequests;
+        if ($lazy) {
+            return $body;
+        }
+
+        //fetches individual PRs with more detailed info including Project
+        foreach ($body['items'] as $event) {
+            $prinfo = $this->authenticatedRequest($event['pull_request']['url']);
+            $pullrequests[] = json_decode($prinfo->getBody(), 1);
+        }
+
+        return ['total_count' => $total, 'items' => $pullrequests ];
     }
-
-    /**
-     * Returns the next page to query
-     * @param string $links
-     * @return null
-     */
-    private function getNextPage($links)
-    {
-        $result = [];
-
-        if (preg_match('#<(.*?)>; rel="next",#', $links, $result)) {
-            return isset($result[1]) ? $result[1] : null;
-        }
-
-        return null;
-    }
-
-    /**
-     * Returns an array with valid Pull Requests opened by this user within the right date range
-     * @param ResponseInterface $response
-     * @return array
-     */
-    private function getPullRequests(ResponseInterface $response)
-    {
-        $pullrequests = [];
-        $events = json_decode($response->getBody(), 1);
-        foreach ($events as $event) {
-            if ($event['type'] !== 'PullRequestEvent') {
-                continue;
-            }
-
-            $payload = $event['payload'];
-
-            if ($payload['action'] !== 'opened') {
-                continue;
-            }
-
-            //verify the date
-            $created = new \DateTimeImmutable($payload['pull_request']['created_at']);
-            if ( ($created < $this->startDate) or ($created > $this->endDate)) {
-                continue;
-            }
-
-            $pullrequests[] = $payload['pull_request'];
-        }
-
-        return $pullrequests;
-    }
-
     /**
      * @param string $endpoint
      * @return ResponseInterface

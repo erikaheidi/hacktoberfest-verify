@@ -35,8 +35,12 @@ class DefaultController extends Controller
         if (!$pullrequests) {
             $token = $this->getDoctrine()->getRepository('AppBundle:Credentials')->getGithubToken($user->getId());
             $github = new GithubPRChecker($token);
-            $pullrequests = $github->getUserPullRequests($user->getUsername());
-            $cache->save($key, $pullrequests);
+            $search = $github->getUserPullRequests($user->getUsername());
+
+            if ($search) {
+                $pullrequests = $search['pullrequests'];
+                $cache->save($key, $pullrequests);
+            }
         }
 
 
