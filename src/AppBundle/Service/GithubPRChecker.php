@@ -56,7 +56,7 @@ class GithubPRChecker
      */
     public function getUserPullRequests($username, $lazy = false)
     {
-        $url = self::$API_BASE . "/search/issues?q=author:$username+type:pr+created:2015-10-01..2015-10-31";
+        $url = self::$API_BASE . "/search/issues?q=author:$username+type:pr+created:2015-10-01..2015-10-31T23:59:59-11:00";
 
         $response = $this->authenticatedRequest($url);
         $pullrequests = [];
