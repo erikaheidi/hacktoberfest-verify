@@ -4,24 +4,26 @@
       {% set total = pullrequests|length %}
     {% endif %}
 
-    {% if total > 4 %}
-          {% set title = "Amazing! You're such an overachiever!" %}
-          {% set message = "You did your homework, congratulations!" %}
+
+    {% if total == 42 %}
+      {% elseif total > 4 %}
+          {% set title = "WOW!" %}
+          {% set message = "Goodbye and thanks for all the fish." %}
       {% elseif total == 4 %}
           {% set title = "Congratulations, you made it!" %}
           {% set message = "You are all set for getting your prize." %}
       {% elseif total == 3 %}
-          {% set title = "Just one more to go!" %}
-          {% set message = "You are so close! Get one more PR out there to guarantee your prize." %}
+          {% set title = "Almost..." %}
+          {% set message = "You were so close! But you did well, with 3 Pull Requests." %}
       {% elseif total == 2 %}
-          {% set title = "You Are Almost There!" %}
-          {% set message = "You're half-way there, keep up with the good work!" %}
+          {% set title = "Half" %}
+          {% set message = "You did half way - that's already something" %}
       {% elseif total == 1 %}
-          {% set title = "Good Job - Keep up!" %}
-          {% set message = "That's already a good start - keep up!" %}
+          {% set title = "Uno" %}
+          {% set message = "You participated, that's what it counts! One PR - Hope it was a good one." %}
       {% else %}
-          {% set title = "There's still time!" %}
-          {% set message = "Aw, it seems you don't have any valid Pull Request yet, but there's still time! " %}
+          {% set title = "Better Luck next Time" %}
+          {% set message = "Aw, it seems you don't have any valid Pull Request. Maybe try again next year? " %}
     {% endif %}
           <h3>{{ title }}</h3>
           <p>{{ message }}</p>
