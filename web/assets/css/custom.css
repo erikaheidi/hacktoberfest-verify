@@ -38,6 +38,7 @@ div.verification-result strong {
 }
 
 div.pullrequest .project {
+    overflow-wrap: break-word;
     background-color: #0088CC;
     padding: 4px 6px;
     color: #F5F5F5;
