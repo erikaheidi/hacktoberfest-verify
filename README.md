@@ -1,3 +1,5 @@
+NOTE: The site is temporarly down. Will update with more info later.
+
 hacktoberfest verification
 ==========================
 
